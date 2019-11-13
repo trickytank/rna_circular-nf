@@ -72,6 +72,7 @@ process 'create_star_index' {
 }
 
 process 'alignment_star' {
+  label 'star'
   tag 'TODO'
 
   input:
