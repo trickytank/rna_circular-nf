@@ -59,7 +59,7 @@ process 'create_star_index' {
 
   script:
   """
-  mkdir genome_dir
+  mkdir star_index_dir
 
   STAR --runMode genomeGenerate \
        --genomeDir genome_dir \
