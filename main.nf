@@ -15,11 +15,11 @@ params.reads  = "../circRNA_detection_review/simu/pos_{1,2}.fastq.gz"
 
 
 // Pipeline
-process 'fetch_ref_genome' {
+process fetch_ref_fasta {
   label 'circexplorer'
 
   input:
-    genome
+    val genome
 
   output:
     path("${genome}.fa")
@@ -30,14 +30,14 @@ process 'fetch_ref_genome' {
   """
 }
 
-process 'fetch_ref_fasta' {
+process fetch_ref_genes {
   label 'circexplorer'
 
   input:
-    genome
+    val genome
 
   output:
-    path("${genome}_ens.gtf)
+    path("${genome}_ens.gtf")
 
   """
     # Download human Ensembl gene annotation file
