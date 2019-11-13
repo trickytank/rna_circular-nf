@@ -64,7 +64,9 @@ process 'create_star_index' {
   STAR --runMode genomeGenerate \
        --genomeDir genome_dir \
        --genomeFastaFiles ${genome} \
-       --runThreadN ${task.cpus}
+       --runThreadN ${task.cpus} \
+       --genomeSAindexNbases 12
+  ## TODO: allow adjustment of --genomeSAindexNbases outside
   """
 
 }
