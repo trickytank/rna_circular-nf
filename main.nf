@@ -72,15 +72,30 @@ process 'create_star_index' {
 }
 
 process 'alignment_star' {
+  tag 'TODO'
+
+  input:
+    path star_index_dir
+    tuple sample_id, path(read1), path(read)
+    
+  output:
+    tuple sample_id, path("out/$sample_id.Aligned.out.sam")
+    tuple sample_id, path("out/$sample_id.Log.final.out")
 
   script:
   """
+    mkdir out
+
     STAR \
         --chimSegmentMin 10 \
         --runThreadN ${task.cpus} \
-        --genomeDir hg19_STAR_index \
-        --readFilesIn read_1.fastq read_2.fastq
+        --genomeDir star_index_dir \
+        --outSAMstrandField intronMotif \
+        --readFilesIn $read1 $read2 \
+        --outFileNamePrefix out/$sample_id.
   """
+  // TODO: allow RNA strandedness to be specified.
+  // The above is coded for unstranded RNA seq.
 }
 */
 
