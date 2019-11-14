@@ -20,7 +20,6 @@ gtf_ref = file(params.gtf)
 
 
 // Pipeline
-/*
 process fetch_ref_fasta {
   label 'circexplorer'
 
@@ -53,7 +52,6 @@ process fetch_ref_genes {
 
   """
 }
-*/
 
 
 process create_star_index {
