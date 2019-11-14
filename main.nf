@@ -160,17 +160,32 @@ process circ_parse {
 
 }
 
-/*
-process circ_annotate {
-  label 'circexplorer'
-
-}
-
 process circ_denovo {
   label 'circexplorer'
+  tag "$sample_id"
 
+  input:
+    path genome // reference fasta
+    path genome_fai
+    path annotation // gene annotation txt file
+    path gtf // genes
+    tuple sample_id, path(reads)
+
+  output:
+    path '*' 
+
+  script:
+  """
+    fast_circ.py denovo \
+      -r $annotation \
+      -g $genome \
+      -G $gtf \
+      -p ${task.cpus} \
+      -f ${reads[0]}
+  """
 }
 
+/*
 process multiqc {
   label 'seq_qc'
 
@@ -197,4 +212,16 @@ workflow {
     annotation_ref,
     alignment_star.out[0]
   )
+
+  circ_denovo(
+    fasta_ref,
+    genome_fai.out,
+    annotation_ref,
+    gtf_ref,
+    reads_ch
+  )
+
+  publish:
+    circ_parse.out to: 'results/circ_parse',
+    mode: 'link'
 }
