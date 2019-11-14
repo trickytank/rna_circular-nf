@@ -146,7 +146,7 @@ process circ_parse {
   output:
     tuple sample_id,
       path("${sample_id}.back_spliced_junction.bed")
-    
+      // Also outputs circularRNA_known.txt, may not be important...
 
   script:
   """
