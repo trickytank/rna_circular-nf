@@ -12,11 +12,13 @@ nextflow.preview.dsl=2
 params.genome = "hg19"
 params.fasta = "data/reference/chr1.fa"
 params.gtf   = "data/reference/hg19_ens_chr1.gtf"
-params.reads  = "../circRNA_detection_review/simu/pos_{1,2}.fastq.gz"
+params.annotation   = "data/reference/hg19_ens_chr1.txt"
+params.reads  = "data/mini/pos_mini_{1,2}.fastq.gz"
 
 // Parse parameters
 fasta_ref = file(params.fasta)
 gtf_ref = file(params.gtf)
+annotation_ref = file(params.annotation)
 
 
 // Pipeline
@@ -88,8 +90,10 @@ process alignment_star {
     tuple sample_id, path(reads)
     
   output:
-    tuple sample_id, path("out/${sample_id}.Aligned.out.sam")
-    tuple sample_id, path("out/${sample_id}.Log.final.out")
+    tuple sample_id,
+      path("out/${sample_id}.Aligned.out.sam"),
+      path("out/${sample_id}.Log.final.out"),
+      path("out/${sample_id}.Chimeric.out.junction")
 
   script:
   """
@@ -110,20 +114,51 @@ process alignment_star {
 }
 
 process circ_parse {
+  label 'circexplorer'
+  tag "$sample_id"
+
+  input:
+    path genome // reference fasta
+    path annotation // gene annotation txt file
+    tuple sample_id,
+      path("${sample_id}.Aligned.out.sam"),
+      path("${sample_id}.Log.final.out"),
+      path("${sample_id}.Chimeric.out.junction")
+
+  output:
+    tuple sample_id,
+      path("${sample_id}.back_spliced_junction.bed")
+    
+
+  script:
+  """
+    fast_circ.py parse \
+      -r $annotation \
+      -g $genome \
+      -t STAR \
+      ${sample_id}.Chimeric.out.junction
+
+      mv back_spliced_junction.bed "${sample_id}.back_spliced_junction.bed"
+  """
 
 }
 
+/*
 process circ_annotate {
+  label 'circexplorer'
 
 }
 
 process circ_denovo {
+  label 'circexplorer'
 
 }
 
 process multiqc {
+  label 'seq_qc'
 
 }
+*/
 
 workflow {
   reads_ch    = Channel.fromFilePairs(params.reads)
@@ -137,5 +172,9 @@ workflow {
     create_star_index.out,
     reads_ch
   )
-  
+  circ_parse(
+    fasta_ref,
+    annotation_ref,
+    alignment_star.out
+  )
 }
