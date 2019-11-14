@@ -56,6 +56,23 @@ process fetch_ref_genes {
 }
 
 
+process 'genome_fai' {
+  label 'star'
+
+  input:
+      path genome
+
+  output:
+      path "${genome}.fai"
+
+  script:
+  """
+  samtools faidx ${genome}
+  """
+}
+
+
+
 process create_star_index {
   label 'star'
 
@@ -119,6 +136,7 @@ process circ_parse {
 
   input:
     path genome // reference fasta
+    path genome_fai
     path annotation // gene annotation txt file
     tuple sample_id,
       path("${sample_id}.Aligned.out.sam"),
@@ -166,6 +184,8 @@ workflow {
   // fetch_ref_genes(params.genome)
   // fetch_ref_fasta(params.genome)
 
+  genome_fai(fasta_ref)
+
   create_star_index(fasta_ref, gtf_ref)
 
   alignment_star(
@@ -174,6 +194,7 @@ workflow {
   )
   circ_parse(
     fasta_ref,
+    genome_fai.out,
     annotation_ref,
     alignment_star.out
   )
