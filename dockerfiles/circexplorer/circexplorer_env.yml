@@ -15,4 +15,5 @@ dependencies:
   - ucsc-gtftogenepred=377
   - ucsc-bedgraphtobigwig=377
   - ucsc-bedtobigbed=377
+  - bowtie=1.2.3
 
