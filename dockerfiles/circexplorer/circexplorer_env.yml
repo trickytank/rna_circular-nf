@@ -16,4 +16,4 @@ dependencies:
   - ucsc-bedgraphtobigwig=377
   - ucsc-bedtobigbed=377
   - bowtie=1.2.3
-
+  - bowtie2=2.3.5

@@ -185,12 +185,20 @@ process circ_denovo {
   """
 }
 
-/*
 process multiqc {
   label 'seq_qc'
 
+  input:
+    path files
+
+  output:
+    path '*'
+
+  script:
+  """
+  multiqc --interactive .
+  """
 }
-*/
 
 workflow {
   reads_ch    = Channel.fromFilePairs(params.reads)
@@ -213,6 +221,7 @@ workflow {
     alignment_star.out[0]
   )
 
+/*
   circ_denovo(
     fasta_ref,
     genome_fai.out,
@@ -220,8 +229,14 @@ workflow {
     gtf_ref,
     reads_ch
   )
+*/
+
+  multiqc(
+    // alignment_star.out[1].mix(fastqc.out).collect()
+    alignment_star.out[1].collect()
+  )
 
   publish:
-    circ_parse.out to: 'results/circ_parse',
-    mode: 'link'
+    circ_parse.out to: 'results/circ_parse', mode: 'link'
+    multiqc.out to: 'results/multi_qc', mode: 'link'
 }
