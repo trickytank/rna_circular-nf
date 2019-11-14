@@ -10,11 +10,17 @@ nextflow.preview.dsl=2
 // Define the default parameters
 
 params.genome = "hg19"
+params.fasta = "data/reference/chr1.fa"
+params.gtf   = "data/reference/hg19_ens_chr1.gtf"
 params.reads  = "../circRNA_detection_review/simu/pos_{1,2}.fastq.gz"
 
+// Parse parameters
+fasta_ref = file(params.fasta)
+gtf_ref = file(params.gtf)
 
 
 // Pipeline
+/*
 process fetch_ref_fasta {
   label 'circexplorer'
 
@@ -38,7 +44,6 @@ process fetch_ref_genes {
 
   output:
     path("${genome}_ens.gtf")
-
   """
     # Download human Ensembl gene annotation file
     fetch_ucsc.py ${genome} ens ${genome}_ens.txt
@@ -48,27 +53,33 @@ process fetch_ref_genes {
 
   """
 }
+*/
 
-/*
-process 'create_star_index' {
+
+process create_star_index {
+  label 'star'
+
   input:
-      file genome from genome_file
+      path genome // reference fasta
+      path gtf // genes
 
   output:
-      file "genome_dir" into star_index_ch
+      path "star_index_dir"
 
   script:
   """
   mkdir genome_dir
 
   STAR --runMode genomeGenerate \
-       --genomeDir genome_dir \
+       --genomeDir star_index_dir \
        --genomeFastaFiles ${genome} \
+       --sjdbGTFfile ${gtf} \
        --runThreadN ${task.cpus}
   """
 
 }
 
+/*
 process 'alignment_star' {
 
   script:
@@ -85,7 +96,9 @@ process 'alignment_star' {
 workflow {
   //reads_ch    = Channel.fromFilePairs(params.reads)
 
-  fetch_ref_genes(params.genome)
-  fetch_ref_fasta(params.genome)
+  // fetch_ref_genes(params.genome)
+  // fetch_ref_fasta(params.genome)
+
+  create_star_index(fasta_ref, gtf_ref)
   
 }
