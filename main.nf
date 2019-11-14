@@ -109,8 +109,8 @@ process alignment_star {
   output:
     tuple sample_id,
       path("out/${sample_id}.Aligned.out.sam"),
-      path("out/${sample_id}.Log.final.out"),
       path("out/${sample_id}.Chimeric.out.junction")
+    path("out/${sample_id}.Log.final.out")
 
   script:
   """
@@ -140,7 +140,6 @@ process circ_parse {
     path annotation // gene annotation txt file
     tuple sample_id,
       path("${sample_id}.Aligned.out.sam"),
-      path("${sample_id}.Log.final.out"),
       path("${sample_id}.Chimeric.out.junction")
 
   output:
@@ -196,6 +195,6 @@ workflow {
     fasta_ref,
     genome_fai.out,
     annotation_ref,
-    alignment_star.out
+    alignment_star.out[0]
   )
 }
