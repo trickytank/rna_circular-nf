@@ -109,6 +109,22 @@ process alignment_star {
   // The above is coded for unstranded RNA seq.
 }
 
+process circ_parse {
+
+}
+
+process circ_annotate {
+
+}
+
+process circ_denovo {
+
+}
+
+process multiqc {
+
+}
+
 workflow {
   reads_ch    = Channel.fromFilePairs(params.reads)
 
