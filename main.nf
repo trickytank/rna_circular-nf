@@ -79,18 +79,17 @@ process create_star_index {
 
 }
 
-/*
-process 'alignment_star' {
+process alignment_star {
   label 'star'
-  tag 'TODO'
+  tag "$sample_id"
 
   input:
     path star_index_dir
-    tuple sample_id, path(read1), path(read)
+    tuple sample_id, path(reads)
     
   output:
-    tuple sample_id, path("out/$sample_id.Aligned.out.sam")
-    tuple sample_id, path("out/$sample_id.Log.final.out")
+    tuple sample_id, path("out/${sample_id}.Aligned.out.sam")
+    tuple sample_id, path("out/${sample_id}.Log.final.out")
 
   script:
   """
@@ -101,20 +100,26 @@ process 'alignment_star' {
         --runThreadN ${task.cpus} \
         --genomeDir star_index_dir \
         --outSAMstrandField intronMotif \
-        --readFilesIn $read1 $read2 \
-        --outFileNamePrefix out/$sample_id.
+        --readFilesCommand gunzip -c \
+        --readFilesIn $reads \
+        --outFileNamePrefix out/${sample_id}.
   """
   // TODO: allow RNA strandedness to be specified.
+  // TODO (low priority): allow uncompressed fastq to work
   // The above is coded for unstranded RNA seq.
 }
-*/
 
 workflow {
-  //reads_ch    = Channel.fromFilePairs(params.reads)
+  reads_ch    = Channel.fromFilePairs(params.reads)
 
   // fetch_ref_genes(params.genome)
   // fetch_ref_fasta(params.genome)
 
   create_star_index(fasta_ref, gtf_ref)
+
+  alignment_star(
+    create_star_index.out,
+    reads_ch
+  )
   
 }
