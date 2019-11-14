@@ -13,7 +13,7 @@ params.genome = "hg19"
 params.fasta = "data/reference/chr1.fa"
 params.gtf   = "data/reference/hg19_ens_chr1.gtf"
 params.annotation   = "data/reference/hg19_ens_chr1.txt"
-params.reads  = "data/mini/pos_mini_{1,2}.fastq.gz"
+params.reads  = "data/mini/*_{1,2}.fastq.gz"
 
 // Parse parameters
 fasta_ref = file(params.fasta)
@@ -71,6 +71,21 @@ process 'genome_fai' {
   """
 }
 
+process fastqc {
+  label 'seq_qc'
+
+  input:
+    tuple sample_id, path(reads)
+  output:
+    path '*'
+
+  script:
+  """
+    fastqc \
+      --threads ${task.cpus} \
+      $reads
+  """
+}
 
 
 process create_star_index {
@@ -230,10 +245,13 @@ workflow {
     reads_ch
   )
 */
+  fastqc(
+    reads_ch
+  )
 
   multiqc(
-    // alignment_star.out[1].mix(fastqc.out).collect()
-    alignment_star.out[1].collect()
+    alignment_star.out[1].mix(fastqc.out).collect()
+    // alignment_star.out[1].collect()
   )
 
   publish:
